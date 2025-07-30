@@ -1,2 +1,389 @@
-Código 01
-código 02
+Plano Detalhado - Base de Dados para Sistema de Contas a Pagar e Receber
+1. TABELAS PRINCIPAIS
+EMPRESAS
+Propósito: Dados da empresa (multi-empresa)
+
+id_empresa (PK) - INT AUTO_INCREMENT
+razao_social - VARCHAR(200) NOT NULL
+nome_fantasia - VARCHAR(150)
+cnpj - VARCHAR(18) UNIQUE
+inscricao_estadual - VARCHAR(20)
+inscricao_municipal - VARCHAR(20)
+endereco - VARCHAR(200)
+numero - VARCHAR(10)
+complemento - VARCHAR(50)
+bairro - VARCHAR(100)
+cidade - VARCHAR(100)
+estado - VARCHAR(2)
+cep - VARCHAR(10)
+telefone - VARCHAR(20)
+email - VARCHAR(100)
+ativo - BOOLEAN DEFAULT TRUE
+data_cadastro - TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+data_atualizacao - TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+Índices:
+
+PRIMARY KEY (id_empresa)
+UNIQUE INDEX idx_cnpj (cnpj)
+INDEX idx_ativo (ativo)
+
+
+FORNECEDORES
+Propósito: Cadastro de fornecedores para contas a pagar
+
+id_fornecedor (PK) - INT AUTO_INCREMENT
+id_empresa (FK) - INT NOT NULL
+tipo_pessoa - ENUM('FISICA', 'JURIDICA') NOT NULL
+razao_social - VARCHAR(200) NOT NULL
+nome_fantasia - VARCHAR(150)
+cpf_cnpj - VARCHAR(18) NOT NULL
+rg_inscricao_estadual - VARCHAR(20)
+endereco - VARCHAR(200)
+numero - VARCHAR(10)
+complemento - VARCHAR(50)
+bairro - VARCHAR(100)
+cidade - VARCHAR(100)
+estado - VARCHAR(2)
+cep - VARCHAR(10)
+telefone - VARCHAR(20)
+celular - VARCHAR(20)
+email - VARCHAR(100)
+observacoes - TEXT
+ativo - BOOLEAN DEFAULT TRUE
+data_cadastro - TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+data_atualizacao - TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+Índices:
+
+PRIMARY KEY (id_fornecedor)
+FOREIGN KEY (id_empresa) REFERENCES empresas(id_empresa)
+INDEX idx_empresa_fornecedor (id_empresa)
+INDEX idx_cpf_cnpj (cpf_cnpj)
+INDEX idx_razao_social (razao_social)
+INDEX idx_ativo (ativo)
+
+
+CLIENTES
+Propósito: Cadastro de clientes para contas a receber
+
+id_cliente (PK) - INT AUTO_INCREMENT
+id_empresa (FK) - INT NOT NULL
+tipo_pessoa - ENUM('FISICA', 'JURIDICA') NOT NULL
+razao_social - VARCHAR(200) NOT NULL
+nome_fantasia - VARCHAR(150)
+cpf_cnpj - VARCHAR(18) NOT NULL
+rg_inscricao_estadual - VARCHAR(20)
+endereco - VARCHAR(200)
+numero - VARCHAR(10)
+complemento - VARCHAR(50)
+bairro - VARCHAR(100)
+cidade - VARCHAR(100)
+estado - VARCHAR(2)
+cep - VARCHAR(10)
+telefone - VARCHAR(20)
+celular - VARCHAR(20)
+email - VARCHAR(100)
+limite_credito - DECIMAL(15,2) DEFAULT 0.00
+observacoes - TEXT
+ativo - BOOLEAN DEFAULT TRUE
+data_cadastro - TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+data_atualizacao - TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+Índices:
+
+PRIMARY KEY (id_cliente)
+FOREIGN KEY (id_empresa) REFERENCES empresas(id_empresa)
+INDEX idx_empresa_cliente (id_empresa)
+INDEX idx_cpf_cnpj (cpf_cnpj)
+INDEX idx_razao_social (razao_social)
+INDEX idx_ativo (ativo)
+
+
+CATEGORIAS
+Propósito: Categorização das contas (despesas e receitas)
+
+id_categoria (PK) - INT AUTO_INCREMENT
+id_empresa (FK) - INT NOT NULL
+nome - VARCHAR(100) NOT NULL
+descricao - TEXT
+tipo - ENUM('DESPESA', 'RECEITA') NOT NULL
+ativo - BOOLEAN DEFAULT TRUE
+data_cadastro - TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
+Índices:
+
+PRIMARY KEY (id_categoria)
+FOREIGN KEY (id_empresa) REFERENCES empresas(id_empresa)
+INDEX idx_empresa_categoria (id_empresa)
+INDEX idx_tipo (tipo)
+INDEX idx_ativo (ativo)
+
+
+CENTROS_CUSTO
+Propósito: Centros de custo para classificação financeira
+
+id_centro_custo (PK) - INT AUTO_INCREMENT
+id_empresa (FK) - INT NOT NULL
+codigo - VARCHAR(20) NOT NULL
+nome - VARCHAR(100) NOT NULL
+descricao - TEXT
+ativo - BOOLEAN DEFAULT TRUE
+data_cadastro - TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
+Índices:
+
+PRIMARY KEY (id_centro_custo)
+FOREIGN KEY (id_empresa) REFERENCES empresas(id_empresa)
+INDEX idx_empresa_centro (id_empresa)
+INDEX idx_codigo (codigo)
+INDEX idx_ativo (ativo)
+
+
+FORMAS_PAGAMENTO
+Propósito: Tipos de pagamento (dinheiro, cartão, boleto, etc.)
+
+id_forma_pagamento (PK) - INT AUTO_INCREMENT
+id_empresa (FK) - INT NOT NULL
+nome - VARCHAR(50) NOT NULL
+descricao - VARCHAR(200)
+tipo - ENUM('DINHEIRO', 'CHEQUE', 'CARTAO_CREDITO', 'CARTAO_DEBITO', 'TRANSFERENCIA', 'BOLETO', 'PIX') NOT NULL
+prazo_compensacao - INT DEFAULT 0 (dias para compensação)
+taxa_percentual - DECIMAL(5,2) DEFAULT 0.00
+taxa_fixa - DECIMAL(10,2) DEFAULT 0.00
+ativo - BOOLEAN DEFAULT TRUE
+data_cadastro - TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
+Índices:
+
+PRIMARY KEY (id_forma_pagamento)
+FOREIGN KEY (id_empresa) REFERENCES empresas(id_empresa)
+INDEX idx_empresa_forma (id_empresa)
+INDEX idx_tipo (tipo)
+INDEX idx_ativo (ativo)
+
+
+CONTAS_BANCARIAS
+Propósito: Contas bancárias da empresa
+
+id_conta_bancaria (PK) - INT AUTO_INCREMENT
+id_empresa (FK) - INT NOT NULL
+banco - VARCHAR(100) NOT NULL
+agencia - VARCHAR(10) NOT NULL
+conta - VARCHAR(20) NOT NULL
+digito - VARCHAR(2)
+tipo_conta - ENUM('CORRENTE', 'POUPANCA', 'APLICACAO') NOT NULL
+saldo_inicial - DECIMAL(15,2) DEFAULT 0.00
+saldo_atual - DECIMAL(15,2) DEFAULT 0.00
+limite_credito - DECIMAL(15,2) DEFAULT 0.00
+ativo - BOOLEAN DEFAULT TRUE
+data_cadastro - TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+data_atualizacao - TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+Índices:
+
+PRIMARY KEY (id_conta_bancaria)
+FOREIGN KEY (id_empresa) REFERENCES empresas(id_empresa)
+INDEX idx_empresa_conta (id_empresa)
+INDEX idx_banco_agencia_conta (banco, agencia, conta)
+INDEX idx_ativo (ativo)
+
+
+2. TABELAS DE MOVIMENTAÇÃO
+CONTAS_PAGAR
+Propósito: Registro das contas a pagar
+
+id_conta_pagar (PK) - INT AUTO_INCREMENT
+id_empresa (FK) - INT NOT NULL
+id_fornecedor (FK) - INT NOT NULL
+id_categoria (FK) - INT NOT NULL
+id_centro_custo (FK) - INT
+numero_documento - VARCHAR(50)
+descricao - VARCHAR(200) NOT NULL
+valor_original - DECIMAL(15,2) NOT NULL
+valor_desconto - DECIMAL(15,2) DEFAULT 0.00
+valor_acrescimo - DECIMAL(15,2) DEFAULT 0.00
+valor_final - DECIMAL(15,2) NOT NULL
+valor_pago - DECIMAL(15,2) DEFAULT 0.00
+data_emissao - DATE NOT NULL
+data_vencimento - DATE NOT NULL
+data_pagamento - DATE
+status - ENUM('PENDENTE', 'PAGO', 'VENCIDO', 'CANCELADO') DEFAULT 'PENDENTE'
+observacoes - TEXT
+data_cadastro - TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+data_atualizacao - TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+Índices:
+
+PRIMARY KEY (id_conta_pagar)
+FOREIGN KEY (id_empresa) REFERENCES empresas(id_empresa)
+FOREIGN KEY (id_fornecedor) REFERENCES fornecedores(id_fornecedor)
+FOREIGN KEY (id_categoria) REFERENCES categorias(id_categoria)
+FOREIGN KEY (id_centro_custo) REFERENCES centros_custo(id_centro_custo)
+INDEX idx_empresa_pagar (id_empresa)
+INDEX idx_fornecedor (id_fornecedor)
+INDEX idx_data_vencimento (data_vencimento)
+INDEX idx_status (status)
+INDEX idx_numero_documento (numero_documento)
+
+
+CONTAS_RECEBER
+Propósito: Registro das contas a receber
+
+id_conta_receber (PK) - INT AUTO_INCREMENT
+id_empresa (FK) - INT NOT NULL
+id_cliente (FK) - INT NOT NULL
+id_categoria (FK) - INT NOT NULL
+id_centro_custo (FK) - INT
+numero_documento - VARCHAR(50)
+descricao - VARCHAR(200) NOT NULL
+valor_original - DECIMAL(15,2) NOT NULL
+valor_desconto - DECIMAL(15,2) DEFAULT 0.00
+valor_acrescimo - DECIMAL(15,2) DEFAULT 0.00
+valor_final - DECIMAL(15,2) NOT NULL
+valor_recebido - DECIMAL(15,2) DEFAULT 0.00
+data_emissao - DATE NOT NULL
+data_vencimento - DATE NOT NULL
+data_recebimento - DATE
+status - ENUM('PENDENTE', 'RECEBIDO', 'VENCIDO', 'CANCELADO') DEFAULT 'PENDENTE'
+observacoes - TEXT
+data_cadastro - TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+data_atualizacao - TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+Índices:
+
+PRIMARY KEY (id_conta_receber)
+FOREIGN KEY (id_empresa) REFERENCES empresas(id_empresa)
+FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente)
+FOREIGN KEY (id_categoria) REFERENCES categorias(id_categoria)
+FOREIGN KEY (id_centro_custo) REFERENCES centros_custo(id_centro_custo)
+INDEX idx_empresa_receber (id_empresa)
+INDEX idx_cliente (id_cliente)
+INDEX idx_data_vencimento (data_vencimento)
+INDEX idx_status (status)
+INDEX idx_numero_documento (numero_documento)
+
+
+PAGAMENTOS
+Propósito: Registro dos pagamentos realizados
+
+id_pagamento (PK) - INT AUTO_INCREMENT
+id_conta_pagar (FK) - INT NOT NULL
+id_conta_bancaria (FK) - INT
+id_forma_pagamento (FK) - INT NOT NULL
+numero_pagamento - VARCHAR(50)
+valor_pago - DECIMAL(15,2) NOT NULL
+valor_desconto - DECIMAL(15,2) DEFAULT 0.00
+valor_acrescimo - DECIMAL(15,2) DEFAULT 0.00
+data_pagamento - DATE NOT NULL
+observacoes - TEXT
+data_cadastro - TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
+Índices:
+
+PRIMARY KEY (id_pagamento)
+FOREIGN KEY (id_conta_pagar) REFERENCES contas_pagar(id_conta_pagar)
+FOREIGN KEY (id_conta_bancaria) REFERENCES contas_bancarias(id_conta_bancaria)
+FOREIGN KEY (id_forma_pagamento) REFERENCES formas_pagamento(id_forma_pagamento)
+INDEX idx_conta_pagar (id_conta_pagar)
+INDEX idx_data_pagamento (data_pagamento)
+INDEX idx_numero_pagamento (numero_pagamento)
+
+
+RECEBIMENTOS
+Propósito: Registro dos recebimentos realizados
+
+id_recebimento (PK) - INT AUTO_INCREMENT
+id_conta_receber (FK) - INT NOT NULL
+id_conta_bancaria (FK) - INT
+id_forma_pagamento (FK) - INT NOT NULL
+numero_recebimento - VARCHAR(50)
+valor_recebido - DECIMAL(15,2) NOT NULL
+valor_desconto - DECIMAL(15,2) DEFAULT 0.00
+valor_acrescimo - DECIMAL(15,2) DEFAULT 0.00
+data_recebimento - DATE NOT NULL
+observacoes - TEXT
+data_cadastro - TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
+Índices:
+
+PRIMARY KEY (id_recebimento)
+FOREIGN KEY (id_conta_receber) REFERENCES contas_receber(id_conta_receber)
+FOREIGN KEY (id_conta_bancaria) REFERENCES contas_bancarias(id_conta_bancaria)
+FOREIGN KEY (id_forma_pagamento) REFERENCES formas_pagamento(id_forma_pagamento)
+INDEX idx_conta_receber (id_conta_receber)
+INDEX idx_data_recebimento (data_recebimento)
+INDEX idx_numero_recebimento (numero_recebimento)
+
+
+3. TABELAS DE CONTROLE
+USUARIOS
+Propósito: Controle de acesso ao sistema
+
+id_usuario (PK) - INT AUTO_INCREMENT
+id_empresa (FK) - INT NOT NULL
+nome - VARCHAR(100) NOT NULL
+email - VARCHAR(100) UNIQUE NOT NULL
+senha - VARCHAR(255) NOT NULL
+perfil - ENUM('ADMIN', 'OPERADOR', 'CONSULTA') NOT NULL
+ativo - BOOLEAN DEFAULT TRUE
+ultimo_acesso - TIMESTAMP NULL
+data_cadastro - TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+data_atualizacao - TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+Índices:
+
+PRIMARY KEY (id_usuario)
+FOREIGN KEY (id_empresa) REFERENCES empresas(id_empresa)
+UNIQUE INDEX idx_email (email)
+INDEX idx_empresa_usuario (id_empresa)
+INDEX idx_ativo (ativo)
+
+
+LOG_OPERACOES
+Propósito: Auditoria das operações realizadas
+
+id_log (PK) - INT AUTO_INCREMENT
+id_usuario (FK) - INT NOT NULL
+id_empresa (FK) - INT NOT NULL
+tabela - VARCHAR(50) NOT NULL
+registro_id - INT NOT NULL
+operacao - ENUM('INSERT', 'UPDATE', 'DELETE') NOT NULL
+valores_anteriores - JSON
+valores_novos - JSON
+ip_usuario - VARCHAR(45)
+data_operacao - TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
+Índices:
+
+PRIMARY KEY (id_log)
+FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
+FOREIGN KEY (id_empresa) REFERENCES empresas(id_empresa)
+INDEX idx_tabela_registro (tabela, registro_id)
+INDEX idx_data_operacao (data_operacao)
+INDEX idx_usuario (id_usuario)
+
+
+4. CONSIDERAÇÕES TÉCNICAS
+Regras de Negócio Importantes:
+
+Trigger para atualizar saldo_atual na tabela contas_bancarias sempre que houver pagamento/recebimento
+Trigger para calcular valor_final automaticamente (valor_original + acrescimo - desconto)
+Trigger para atualizar status das contas quando valor_pago/recebido = valor_final
+Procedure para calcular juros e multas por atraso
+View para dashboard com resumos financeiros
+
+Índices Compostos Adicionais:
+
+contas_pagar: (id_empresa, status, data_vencimento)
+contas_receber: (id_empresa, status, data_vencimento)
+pagamentos: (data_pagamento, id_conta_bancaria)
+recebimentos: (data_recebimento, id_conta_bancaria)
+
+Configurações Recomendadas:
+
+Engine: InnoDB (para suporte a transações)
+Charset: utf8mb4
+Collation: utf8mb4_unicode_ci
+Backup diário automático
+Retenção de logs por 2 anos
