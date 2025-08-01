@@ -317,11 +317,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE TRIGGER trg_recebimentos_insert_saldo
-    AFTER INSERT ON recebimentos
-    FOR EACH ROW
-    EXECUTE FUNCTION atualizar_saldo_conta();
-
 CREATE INDEX idx_contas_pagar_empresa_status_vencimento 
 ON contas_pagar (id_empresa, status, data_vencimento);
 
