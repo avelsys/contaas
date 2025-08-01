@@ -329,6 +329,11 @@ ON pagamentos (data_pagamento, id_conta_bancaria);
 CREATE INDEX idx_recebimentos_data_recebimento_conta_bancaria 
 ON recebimentos (data_recebimento, id_conta_bancaria);
 
+CREATE OR REPLACE TRIGGER trg_recebimentos_insert_saldo
+    AFTER INSERT ON recebimentos
+    FOR EACH ROW
+    EXECUTE FUNCTION atualizar_saldo_conta();
+
 
 
 
